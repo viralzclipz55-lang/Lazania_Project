@@ -1,0 +1,728 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Project: Lazania</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Courier New', Courier, monospace;
+        }
+
+        :root {
+            --neon-green: #39ff14;
+            --green-bright: #7fff00;
+            --green-mid: #00cc00;
+            --green-deep: #005500;
+            --bg-black: #000000;
+            --panel-dark: #051005;
+            --glow-green: rgba(57, 255, 20, 0.4);
+        }
+
+        body {
+            background: var(--bg-black);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: var(--neon-green);
+            overflow-x: hidden;
+            padding: 2rem;
+            position: relative;
+        }
+
+        /* === ENHANCED BINARY RAIN === */
+        #binary-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .binary-column {
+            position: absolute;
+            top: -100%;
+            font-size: 15px;
+            color: rgba(57, 255, 20, 0.12);
+            line-height: 1;
+            animation: fall linear infinite;
+            text-shadow: 0 0 4px rgba(57, 255, 20, 0.2);
+        }
+
+        @keyframes fall {
+            0% { transform: translateY(0); opacity: 0; }
+            5% { opacity: 1; }
+            95% { opacity: 1; }
+            100% { transform: translateY(200vh); opacity: 0; }
+        }
+
+        /* === GRID BACKGROUND === */
+        .grid-bg {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                linear-gradient(rgba(57, 255, 20, 0.03) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(57, 255, 20, 0.03) 1px, transparent 1px);
+            background-size: 40px 40px;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        /* === SCANLINE + FLICKER === */
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(transparent 50%, rgba(0, 20, 0, 0.15) 50%);
+            background-size: 100% 3px;
+            pointer-events: none;
+            z-index: 2;
+            animation: scanline 8s linear infinite;
+        }
+
+        @keyframes scanline {
+            0% { background-position: 0 0; }
+            100% { background-position: 0 100px; }
+        }
+
+        /* === GLOWING TEXT === */
+        .glow-text {
+            text-shadow: 
+                0 0 5px var(--neon-green),
+                0 0 10px var(--neon-green),
+                0 0 20px var(--neon-green),
+                0 0 40px var(--green-mid);
+            animation: textPulse 2s ease-in-out infinite alternate;
+        }
+
+        @keyframes textPulse {
+            from { text-shadow: 0 0 5px var(--neon-green), 0 0 15px var(--neon-green); }
+            to { text-shadow: 0 0 10px var(--neon-green), 0 0 30px var(--neon-green), 0 0 50px var(--green-mid); }
+        }
+
+        /* === MAIN CONTAINER === */
+        .container {
+            text-align: center;
+            padding: 3rem 2rem;
+            border: 1px solid transparent;
+            border-image: linear-gradient(135deg, var(--neon-green), var(--green-mid), var(--neon-green)) 1;
+            background: linear-gradient(135deg, rgba(0,40,0,0.3), rgba(0,20,0,0.5));
+            box-shadow: 
+                0 0 30px var(--glow-green),
+                inset 0 0 60px rgba(57, 255, 20, 0.05),
+                0 0 60px rgba(57, 255, 20, 0.05);
+            z-index: 5;
+            max-width: 720px;
+            width: 100%;
+            position: relative;
+            backdrop-filter: blur(4px);
+            animation: containerGlow 3s ease-in-out infinite;
+        }
+
+        @keyframes containerGlow {
+            0%, 100% { box-shadow: 0 0 30px var(--glow-green), inset 0 0 60px rgba(57, 255, 20, 0.05); }
+            50% { box-shadow: 0 0 50px var(--glow-green), inset 0 0 80px rgba(57, 255, 20, 0.08); }
+        }
+
+        /* Corner decorations */
+        .container::before,
+        .container::after {
+            content: '';
+            position: absolute;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--neon-green);
+        }
+
+        .container::before {
+            top: -10px;
+            left: -10px;
+            border-right: none;
+            border-bottom: none;
+        }
+
+        .container::after {
+            bottom: -10px;
+            right: -10px;
+            border-left: none;
+            border-top: none;
+        }
+
+        h1 {
+            font-size: clamp(2rem, 6vw, 3.2rem);
+            margin-bottom: 0.5rem;
+            color: var(--green-bright);
+            letter-spacing: 6px;
+        }
+
+        .subtitle {
+            font-size: 0.95rem;
+            color: var(--green-mid);
+            margin-bottom: 2rem;
+            letter-spacing: 5px;
+            text-transform: uppercase;
+        }
+
+        .status-line {
+            color: var(--neon-green);
+            font-size: 0.9rem;
+            margin-bottom: 2rem;
+            opacity: 0.9;
+            border-left: 2px solid var(--neon-green);
+            padding-left: 12px;
+            display: inline-block;
+        }
+
+        /* === MAIN BEGIN BUTTON === */
+        .begin-btn {
+            background: transparent;
+            color: var(--neon-green);
+            border: 2px solid var(--neon-green);
+            font-size: 1.5rem;
+            font-weight: bold;
+            padding: 1.2rem 4rem;
+            border-radius: 2px;
+            cursor: pointer;
+            letter-spacing: 8px;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .begin-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(57, 255, 20, 0.2), transparent);
+            transition: left 0.5s ease;
+        }
+
+        .begin-btn:hover {
+            background: var(--neon-green);
+            color: var(--bg-black);
+            box-shadow: 
+                0 0 20px var(--neon-green),
+                0 0 40px var(--neon-green),
+                0 0 60px var(--green-mid),
+                inset 0 0 20px rgba(0,0,0,0.5);
+            transform: scale(1.08);
+            letter-spacing: 10px;
+        }
+
+        .begin-btn:hover::before {
+            left: 100%;
+        }
+
+        /* === PUZZLE GRID === */
+        .puzzle-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+            display: none;
+        }
+
+        .puzzle-btn {
+            background: linear-gradient(135deg, rgba(0,50,0,0.2), rgba(0,30,0,0.4));
+            color: var(--green-mid);
+            border: 1px solid var(--green-deep);
+            font-size: 1rem;
+            padding: 1.8rem 1rem;
+            border-radius: 2px;
+            cursor: pointer;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .puzzle-btn::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(135deg, rgba(57,255,20,0), rgba(57,255,20,0.05));
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+
+        .puzzle-btn:hover:not(.solved):not(.locked) {
+            border-color: var(--neon-green);
+            color: var(--green-bright);
+            box-shadow: 
+                0 0 20px rgba(57, 255, 20, 0.25),
+                inset 0 0 20px rgba(57, 255, 20, 0.05);
+            transform: translateY(-3px) scale(1.02);
+        }
+
+        .puzzle-btn:hover:not(.solved):not(.locked)::before {
+            opacity: 1;
+        }
+
+        .puzzle-btn.solved {
+            border-color: var(--neon-green);
+            background: linear-gradient(135deg, rgba(57,255,20,0.08), rgba(0,40,0,0.3));
+            color: var(--green-bright);
+            cursor: default;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.15);
+        }
+
+        .puzzle-btn.solved strong {
+            color: var(--neon-green);
+        }
+
+        .puzzle-btn.locked {
+            opacity: 0.25;
+            border-color: #1a1a1a;
+            color: #333;
+            cursor: not-allowed;
+            filter: grayscale(60%);
+        }
+
+        /* === PROGRESS BAR === */
+        .progress-bar {
+            height: 10px;
+            background: linear-gradient(90deg, #0a0a0a, #111);
+            border-radius: 2px;
+            margin: 1.5rem 0;
+            overflow: hidden;
+            display: none;
+            border: 1px solid var(--green-deep);
+            position: relative;
+        }
+
+        .progress-bar::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(57,255,20,0.1), transparent);
+            animation: progressShine 2s infinite;
+        }
+
+        @keyframes progressShine {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, var(--green-deep), var(--neon-green), var(--green-bright));
+            transition: width 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            position: relative;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            right: 0;
+            width: 10px;
+            height: 100%;
+            background: var(--green-bright);
+            box-shadow: 0 0 10px var(--neon-green);
+            border-radius: 50%;
+        }
+
+        /* === REWARD SECTION === */
+        .reward-section {
+            margin-top: 2rem;
+            padding: 2.5rem;
+            border: 2px solid var(--neon-green);
+            background: linear-gradient(135deg, rgba(57,255,20,0.05), rgba(0,40,0,0.2));
+            display: none;
+            position: relative;
+            animation: rewardPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes rewardPulse {
+            0%, 100% { 
+                box-shadow: 0 0 10px var(--neon-green), inset 0 0 20px rgba(57,255,20,0.05);
+                border-color: var(--neon-green);
+            }
+            50% { 
+                box-shadow: 0 0 30px var(--neon-green), 0 0 60px var(--green-mid), inset 0 0 40px rgba(57,255,20,0.1);
+                border-color: var(--green-bright);
+            }
+        }
+
+        .reward-link {
+            display: inline-block;
+            margin-top: 1.2rem;
+            padding: 1rem 2.5rem;
+            background: linear-gradient(90deg, var(--green-deep), var(--neon-green));
+            color: var(--bg-black);
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 1.1rem;
+            letter-spacing: 2px;
+            transition: all 0.3s ease;
+            border: none;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .reward-link:hover {
+            transform: scale(1.05);
+            box-shadow: 0 0 20px var(--neon-green), 0 0 40px var(--green-mid);
+            letter-spacing: 4px;
+        }
+
+        /* === MODAL === */
+        .modal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.92);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+            backdrop-filter: blur(6px);
+        }
+
+        .modal {
+            background: linear-gradient(135deg, #051005, #0a1a0a);
+            border: 2px solid var(--green-mid);
+            border-radius: 2px;
+            padding: 2.5rem 2rem;
+            max-width: 500px;
+            width: 90%;
+            text-align: center;
+            box-shadow: 0 0 40px rgba(57, 255, 20, 0.15);
+            animation: modalAppear 0.4s ease-out;
+        }
+
+        @keyframes modalAppear {
+            from { opacity: 0; transform: scale(0.9) translateY(20px); }
+            to { opacity: 1; transform: scale(1) translateY(0); }
+        }
+
+        .modal h3 {
+            color: var(--green-bright);
+            margin-bottom: 1rem;
+            font-size: 1.3rem;
+        }
+
+        .modal p {
+            line-height: 1.7;
+            color: #b0ff90;
+        }
+
+        .modal input {
+            width: 100%;
+            padding: 1rem;
+            margin: 1.2rem 0;
+            background: #000;
+            border: 1px solid var(--green-deep);
+            color: var(--green-bright);
+            border-radius: 2px;
+            font-size: 1.05rem;
+            outline: none;
+            transition: all 0.3s;
+            letter-spacing: 1px;
+        }
+
+        .modal input:focus {
+            border-color: var(--neon-green);
+            box-shadow: 0 0 12px var(--neon-green), inset 0 0 8px rgba(57,255,20,0.1);
+        }
+
+        .modal button {
+            padding: 0.75rem 2rem;
+            margin: 0.5rem;
+            border-radius: 2px;
+            cursor: pointer;
+            font-weight: bold;
+            font-family: inherit;
+            letter-spacing: 1px;
+            transition: all 0.3s;
+        }
+
+        .btn-confirm {
+            background: var(--neon-green);
+            color: var(--bg-black);
+            border: none;
+        }
+
+        .btn-confirm:hover {
+            box-shadow: 0 0 15px var(--neon-green);
+            transform: scale(1.05);
+        }
+
+        .btn-close {
+            background: transparent;
+            color: #666;
+            border: 1px solid #333;
+        }
+
+        .btn-close:hover {
+            border-color: #555;
+            color: #999;
+        }
+
+        .hint {
+            font-size: 0.85rem;
+            color: var(--green-deep);
+            margin-top: 0.8rem;
+            font-style: italic;
+        }
+
+        /* Corner Status Tags */
+        .corner-tag {
+            position: fixed;
+            font-size: 0.7rem;
+            color: var(--green-deep);
+            opacity: 0.5;
+            z-index: 6;
+            font-family: 'Courier New', monospace;
+        }
+
+        .top-left { top: 15px; left: 15px; }
+        .top-right { top: 15px; right: 15px; text-align: right; }
+        .btm-left { bottom: 15px; left: 15px; }
+        .btm-right { bottom: 15px; right: 15px; text-align: right; }
+
+        .hidden { display: none !important; }
+
+        /* Typing cursor effect */
+        .typing-cursor::after {
+            content: '█';
+            animation: blink 1s step-end infinite;
+            color: var(--neon-green);
+        }
+
+        @keyframes blink {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0; }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Background Grid -->
+    <div class="grid-bg"></div>
+
+    <!-- Binary Rain Background -->
+    <div id="binary-bg"></div>
+
+    <!-- Corner Status Tags -->
+    <div class="corner-tag top-left">[SYS: ONLINE]</div>
+    <div class="corner-tag top-right">[v4.0-ULTIMATE]</div>
+    <div class="corner-tag btm-left">[BINARY: ACTIVE]</div>
+    <div class="corner-tag btm-right">[SEC: MAXIMUM]</div>
+
+    <div class="container">
+        <h1 class="glow-text">◆ PROJECT: LAZANIA ◆</h1>
+        <p class="subtitle">// ACCESS CLEARANCE SEQUENCE //</p>
+        <p class="status-line" id="status">> System initialized. Awaiting command<span class="typing-cursor"></span></p>
+
+        <!-- Main Begin Button -->
+        <button class="begin-btn" id="mainBegin" onclick="startProject()">▶ BEGIN</button>
+
+        <!-- Progress Bar -->
+        <div class="progress-bar" id="progressBar">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+
+        <!-- Puzzle Buttons -->
+        <div class="puzzle-grid" id="puzzleGrid">
+            <button class="puzzle-btn" id="puzzle1" onclick="openPuzzle(1)">
+                <strong>🔓 PUZZLE I</strong><br>
+                <small>Identify the Gap</small>
+            </button>
+            <button class="puzzle-btn locked" id="puzzle2" onclick="openPuzzle(2)">
+                <strong>🔒 PUZZLE II</strong><br>
+                <small>⏳ PHASE 1 REQUIRED</small>
+            </button>
+            <button class="puzzle-btn locked" id="puzzle3" onclick="openPuzzle(3)">
+                <strong>🔒 PUZZLE III</strong><br>
+                <small>⏳ PHASE 2 REQUIRED</small>
+            </button>
+            <button class="puzzle-btn locked" id="puzzle4" onclick="openPuzzle(4)">
+                <strong>🔒 PUZZLE IV</strong><br>
+                <small>⏳ PHASE 3 REQUIRED</small>
+            </button>
+        </div>
+
+        <!-- Reward Section -->
+        <div class="reward-section" id="rewardSection">
+            <h3 class="glow-text">✓ ACCESS GRANTED</h3>
+            <p>All security layers bypassed. Your file has been decrypted and is ready for download.</p>
+            <a href="Project_Reward.pdf" class="reward-link" target="_blank">🏆 DOWNLOAD REWARD FILE</a>
+        </div>
+    </div>
+
+    <!-- Puzzle Modal -->
+    <div class="modal-overlay" id="modalOverlay">
+        <div class="modal">
+            <h3 id="modalTitle">Puzzle Title</h3>
+            <p id="modalDesc"></p>
+            <input type="text" id="puzzleAnswer" placeholder="Enter answer here...">
+            <p class="hint" id="modalHint"></p>
+            <br>
+            <button class="btn-close" onclick="closeModal()">CLOSE</button>
+            <button class="btn-confirm" onclick="checkAnswer()">SUBMIT</button>
+        </div>
+    </div>
+
+    <script>
+        // === GENERATE ENHANCED BINARY RAIN ===
+        const binaryContainer = document.getElementById('binary-bg');
+        const binaryChars = '01';
+        const numColumns = 35;
+
+        for (let i = 0; i < numColumns; i++) {
+            const column = document.createElement('div');
+            column.className = 'binary-column';
+            const width = Math.random() * 100;
+            const height = Math.floor(Math.random() * 180) + 10;
+            let text = '';
+            for (let j = 0; j < height; j++) {
+                text += binaryChars[Math.floor(Math.random() * 2)] + ' ';
+            }
+            column.textContent = text;
+            column.style.left = width + '%';
+            column.style.animationDuration = (Math.random() * 15 + 10) + 's';
+            column.style.animationDelay = (Math.random() * 12) + 's';
+            binaryContainer.appendChild(column);
+        }
+
+        // === PUZZLES ===
+        const puzzles = {
+            1: {
+                title: "🔐 PUZZLE I — Data Detective",
+                desc: "I'm the type of gap that loves REALITY! 📊\n\nI'm solved by going out and collecting fresh data, real-world stats, and actual observations. I'm all about what's actually happening, not just what we think might happen.\n\nWhat am I?",
+                answer: "empirical",
+                hint: "Think: 'Empirical = Evidence/Real Data' 📈"
+            },
+            2: {
+                title: "🔐 PUZZLE II — The Visionary",
+                desc: "I'm the type of gap that loves IDEAS! 💡\n\nI'm solved by building better frameworks, models, and explanations. I ask: 'Why does this happen?' and 'How does this work?' I'm all about understanding the underlying mechanisms.\n\nWhat am I?",
+                answer: "theoretical",
+                hint: "Think: Theory = Ideas & Frameworks 🧠"
+            },
+            3: {
+                title: "🔐 PUZZLE III — The Secret Code Name 🎯",
+                desc: "Let's have some fun! 🎉\n\nRearrange these letters to spell a word that means 'a missing piece that needs to be filled before we can finish our work':\n\n   **G A P C H U A R S E R**\n\nType the two-word answer below!",
+                answer: "research gap",
+                hint: "It's what you're finding in your study! Two words: ______ ______"
+            },
+            4: {
+                title: "🔐 PUZZLE IV — Final Confirmation ✨",
+                desc: "Almost there! 🌟\n\nBoth the empirical and theoretical gaps are important because they show what is ________ in the current literature. Without finding this, there's no reason to do a new study!\n\nWhat's the exact word? (5 letters)",
+                answer: "missing",
+                hint: "If something isn't there yet, it's...?"
+            }
+        };
+
+        let currentPuzzle = null;
+        let completed = { 1: false, 2: false, 3: false, 4: false };
+        const totalPuzzles = 4;
+
+        function startProject() {
+            document.getElementById('mainBegin').classList.add('hidden');
+            document.getElementById('status').innerHTML = '>> 🟢 4 SECURITY LAYERS DETECTED — SOLVE IN ORDER <span class="typing-cursor"></span>';
+            document.getElementById('puzzleGrid').style.display = 'grid';
+            document.getElementById('progressBar').style.display = 'block';
+            updateProgress();
+        }
+
+        function openPuzzle(num) {
+            if (num > 1 && !completed[num - 1]) {
+                alert('🔒 ACCESS DENIED\n\nComplete the previous puzzle first!');
+                return;
+            }
+            if (completed[num]) {
+                alert('✅ ALREADY UNLOCKED\n\nYou solved this one already!');
+                return;
+            }
+            currentPuzzle = num;
+            const p = puzzles[num];
+            document.getElementById('modalTitle').textContent = p.title;
+            document.getElementById('modalDesc').textContent = p.desc;
+            document.getElementById('modalHint').textContent = '💡 Hint: ' + p.hint;
+            document.getElementById('puzzleAnswer').value = '';
+            document.getElementById('modalOverlay').style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('modalOverlay').style.display = 'none';
+            document.getElementById('puzzleAnswer').value = '';
+            currentPuzzle = null;
+        }
+
+        function checkAnswer() {
+            const userAnswer = document.getElementById('puzzleAnswer').value.trim().toLowerCase();
+            const correctAnswer = puzzles[currentPuzzle].answer.toLowerCase();
+            
+            if (userAnswer === correctAnswer) {
+                completed[currentPuzzle] = true;
+                const btn = document.getElementById(`puzzle${currentPuzzle}`);
+                btn.classList.add('solved');
+                btn.innerHTML = `<strong>✅ CLEARED!</strong><br><small>Great job!</small>`;
+                
+                if (currentPuzzle < totalPuzzles) {
+                    const nextBtn = document.getElementById(`puzzle${currentPuzzle + 1}`);
+                    nextBtn.classList.remove('locked');
+                    nextBtn.innerHTML = `
+                        <strong>🔓 PUZZLE ${currentPuzzle + 1}</strong><br>
+                        <small>Ready to go!</small>
+                    `;
+                }
+                
+                updateProgress();
+                closeModal();
+                
+                if (currentPuzzle === totalPuzzles) {
+                    allComplete();
+                } else {
+                    alert('✅ CORRECT!\n\n🔓 Layer ' + currentPuzzle + ' unlocked!\n\nKeep going! 🚀');
+                }
+            } else {
+                alert('❌ NOT QUITE\n\nRead the hint carefully and try again! 💡');
+            }
+        }
+
+        function updateProgress() {
+            const doneCount = Object.values(completed).filter(v => v).length;
+            const percent = (doneCount / totalPuzzles) * 100;
+            document.getElementById('progressFill').style.width = percent + '%';
+        }
+
+        function allComplete() {
+            document.getElementById('status').innerHTML = '>>> 🟢🟢🟢 100% — SYSTEM UNLOCKED 🟢🟢🟢 <span class="typing-cursor"></span>';
+            document.getElementById('rewardSection').style.display = 'block';
+            alert('🎉 CONGRATULATIONS!\n\nYou solved all the puzzles!\n\nYour reward file is now available below! 📂');
+        }
+
+        document.getElementById('modalOverlay').addEventListener('click', function(e) {
+            if (e.target === this) closeModal();
+        });
+    </script>
+    
+</body>
+</html>
